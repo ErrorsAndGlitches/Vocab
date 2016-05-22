@@ -1,0 +1,69 @@
+#!/usr/bin/env ruby
+
+require 'mysql2'
+require 'optparse'
+require 'open-uri'
+
+require_relative 'command_line_options'
+require_relative '../lib/anki_note_cards'
+require_relative '../lib/dictionaries/merriam_webster_dictionary'
+require_relative '../lib/dictionaries/multi_dictionary'
+require_relative '../lib/dictionaries/my_sql_dictionary'
+require_relative '../lib/vocab_lists/file_vocab_list'
+require_relative '../lib/vocab_lists/mysql_vocab_list'
+require_relative '../lib/vocab_lists/sqlite_vocab_list'
+
+cmd_line_opts = CommandLineOptions.new(ARGV)
+
+if cmd_line_opts.input_file.nil? && cmd_line_opts.output_file.nil? && !cmd_line_opts.clear_mysql_db?
+  puts 'Nothing to do...'
+  exit 0
+end
+
+fail('SQL configuration required') if cmd_line_opts.sql_config_file.nil?
+mysql_vocab_list = MysqlVocabList.new(cmd_line_opts.sql_config_file, cmd_line_opts.update_existing?)
+
+if cmd_line_opts.clear_mysql_db?
+  mysql_vocab_list.clear
+end
+
+if cmd_line_opts.input_file
+  fail('API Key required') unless cmd_line_opts.api_key
+
+  input_vocab_list = nil
+  input_filename   = cmd_line_opts.input_file
+  if input_filename.end_with?('txt')
+    input_vocab_list = FileVocabList.new(input_filename)
+  elsif input_filename.end_with?('db')
+    input_vocab_list = SqliteVocabList.new(input_filename)
+  else
+    fail("Unrecognized filetype: #{input_filename}")
+  end
+
+  dictionary  = MultiDictionary.new([
+                                      MySqlDictionary.new(cmd_line_opts.sql_config_file),
+                                      MerriamWebsterDictionary.new(cmd_line_opts.api_key)
+                                    ])
+  vocab_words = []
+  input_vocab_list.vocab_words.each { |vocab_word|
+    if vocab_word.is_defined?
+      vocab_words << vocab_word
+    else
+      begin
+        definition = dictionary.definition(vocab_word.word)
+        vocab_words << VocabWord.new(vocab_word.word, definition, vocab_word.example)
+      rescue OpenURI::HTTPError => e
+        puts "Ignoring: unable to fetch the definition for '#{vocab_word.word}': #{e}"
+      rescue Exception => e
+        puts "Unable to fetch the definition for '#{vocab_word.word}': #{e}\n#{e.backtrace.join("\n")}"
+        exit 1
+      end
+    end
+  }
+
+  mysql_vocab_list.add_vocab_words(vocab_words)
+end
+
+if cmd_line_opts.output_file
+  AnkiNoteCards.new(mysql_vocab_list.vocab_words).write(cmd_line_opts.output_file)
+end
