@@ -2,13 +2,14 @@ require_relative 'vocab_list_backend'
 require_relative 'vocab_word'
 
 class FileVocabList < VocabListBackend
-  def initialize(file_name)
+  def initialize(file_name, delimiter)
     @file_name = file_name
+    @delimiter = delimiter
   end
 
   def vocab_words
     IO.readlines(@file_name)
-      .map { |line| line.split(':') }
+      .map { |line| line.split(@delimiter) }
       .map { |word_data|
       VocabWord.new(word_data[0].strip, word_data[1].strip, word_data[2].nil? ? '' : word_data[2].strip)
     }

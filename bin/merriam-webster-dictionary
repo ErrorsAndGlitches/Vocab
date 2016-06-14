@@ -7,7 +7,7 @@ require 'open-uri'
 # quick script to look up words via the Merriam Webster DictionaryAPI and view the XML
 #
 
-xsl = Nokogiri::XSLT(File.read('etc/nokogiri_pretty_print.xsl'))
+xsl = Nokogiri::XSLT(File.read('nokogiri_pretty_print.xsl'))
 url  = "http://www.dictionaryapi.com/api/v1/references/collegiate/xml/#{ARGV[1]}?key=#{ARGV[0]}"
 page = Nokogiri::XML(open(url))
 File.open("#{ARGV[1]}_definition.xml", 'w') { |file| file.write(page.to_s)}

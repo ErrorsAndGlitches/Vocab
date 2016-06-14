@@ -33,7 +33,7 @@ if cmd_line_opts.input_file
   input_vocab_list = nil
   input_filename   = cmd_line_opts.input_file
   if input_filename.end_with?('txt')
-    input_vocab_list = FileVocabList.new(input_filename)
+    input_vocab_list = FileVocabList.new(input_filename, cmd_line_opts.input_file_delimiter)
   elsif input_filename.end_with?('db')
     input_vocab_list = SqliteVocabList.new(input_filename)
   else
@@ -65,5 +65,7 @@ if cmd_line_opts.input_file
 end
 
 if cmd_line_opts.output_file
-  AnkiNoteCards.new(mysql_vocab_list.vocab_words).write(cmd_line_opts.output_file)
+  File.open(cmd_line_opts.output_file, 'w') { |output_file|
+    AnkiNoteCards.new(mysql_vocab_list.vocab_words, cmd_line_opts.output_file_delimiter).write(output_file)
+  }
 end

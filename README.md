@@ -7,13 +7,17 @@ Travis CI: [![Build Status](https://travis-ci.org/MusicalNeutrino/Vocab.svg?bran
 
 # Command Line Options
 
+|:------:|:------------:|----------------------------------------------------------------------------------------------|
 | option | argument     | description                                                                                  |
 |:------:|:------------:|----------------------------------------------------------------------------------------------|
-|   -h   |     -        | Show the help options.                                                                       |
-|   -i   | input.txt    | Input text file or Kindle EReader SQLite3 DB containing vocab words to upload.               |
-|   -o   | output.txt   | Output file for Anki ingestion (colon separated).                                            |
+|   -h   | -            | Show the help options.                                                                       |
 |   -c   | mysql.config | MySQL configuration for the vocabulary database.                                             |
-|   -a   |    api key   | Merriam Webster API key for accessing Dictionary API endpoint.                               |
+|   -a   | api key      | Merriam Webster API key for accessing Dictionary API endpoint.                               |
 |   -j   | api_key.json | File containing the Merriam Webster API key for accessing Dictionary API endpoint.           |
-|   -u   |     -        | Allow updating the MySQL database, otherwise the vocabulary word is ignored.                 |
-|   -d   |     -        | Clear the MySQL database.                                                                    |
+|:------:|:------------:|----------------------------------------------------------------------------------------------|
+|   -i   | input.txt    | Input text file or Kindle EReader SQLite3 DB containing vocab words to upload.               |
+|   -l   | input delim  | The field delimiter for the input text file. Default delimiter: "#"                          |
+|   -o   | output.txt   | Output file for Anki ingestion (colon separated).                                            |
+|   -u   | -            | Allow updating the MySQL database, otherwise the vocabulary word is ignored.                 |
+|   -d   | -            | Clear the MySQL database.                                                                    |
+|:------:|:------------:|----------------------------------------------------------------------------------------------|
