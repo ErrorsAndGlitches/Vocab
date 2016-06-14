@@ -11,4 +11,7 @@ vocabulary words. The data is backed by an Aurora RDS database hosted on AWS.
 |   -i   | input.txt    | Input text file or Kindle EReader SQLite3 DB containing vocab words to upload.               |
 |   -o   | output.txt   | Output file for Anki ingestion (colon separated).                                            |
 |   -c   | mysql.config | MySQL configuration for the vocabulary database.                                             |
+|   -a   |    api key   | Merriam Webster API key for accessing Dictionary API endpoint.                               |
+|   -j   | api_key.json | File containing the Merriam Webster API key for accessing Dictionary API endpoint.           |
 |   -u   |     -        | Allow updating the MySQL database, otherwise the vocabulary word is ignored.                 |
+|   -d   |     -        | Clear the MySQL database.                                                                    |
