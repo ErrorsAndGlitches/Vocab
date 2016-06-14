@@ -1,0 +1,12 @@
+language: ruby
+rvm:
+  - "2.2.1"
+git:
+  depth: 1
+script:
+  - rspec
+branches:
+  only:
+    - devel
+matrix:
+  fast_finish: true
