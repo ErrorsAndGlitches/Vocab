@@ -3,6 +3,8 @@
 This package provides tools to manage a vocabulary database. It integrates with Anki and the Amazon Kindle to manage
 vocabulary words. The data is backed by an Aurora RDS database hosted on AWS.
 
+Travis CI: [![Build Status](https://travis-ci.org/MusicalNeutrino/Vocab.svg?branch=master)](https://travis-ci.org/MusicalNeutrino/Vocab)
+
 # Command Line Options
 
 | option | argument     | description                                                                                  |
