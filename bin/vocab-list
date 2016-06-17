@@ -15,16 +15,20 @@ require_relative '../lib/vocab_lists/sqlite_vocab_list'
 
 cmd_line_opts = CommandLineOptions.new(ARGV)
 
-if cmd_line_opts.input_file.nil? && cmd_line_opts.output_file.nil? && !cmd_line_opts.clear_mysql_db?
-  puts 'Nothing to do...'
-  exit 0
-end
-
 fail('SQL configuration required') if cmd_line_opts.sql_config_file.nil?
 mysql_vocab_list = MysqlVocabList.new(cmd_line_opts.sql_config_file, cmd_line_opts.update_existing?)
 
+if cmd_line_opts.list_db_vocab
+  mysql_vocab_list.vocab_words.each { |vocab_word|
+    puts "#{vocab_word.word}\t#{vocab_word.definition}\t#{vocab_word.example}"
+  }
+end
+
 if cmd_line_opts.clear_mysql_db?
   mysql_vocab_list.clear
+elsif !cmd_line_opts.removal_word.nil?
+  removal_word = cmd_line_opts.removal_word
+  mysql_vocab_list.remove(removal_word)
 end
 
 if cmd_line_opts.input_file

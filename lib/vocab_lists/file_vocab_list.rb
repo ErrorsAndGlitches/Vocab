@@ -1,7 +1,7 @@
-require_relative 'vocab_list_backend'
+require_relative 'vocab_list'
 require_relative 'vocab_word'
 
-class FileVocabList < VocabListBackend
+class FileVocabList < VocabList
   def initialize(file_name, delimiter)
     @file_name = file_name
     @delimiter = delimiter

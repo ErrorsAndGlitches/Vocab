@@ -1,9 +1,9 @@
 require 'sqlite3'
 
 require_relative 'vocab_word'
-require_relative 'vocab_list_backend'
+require_relative 'vocab_list'
 
-class SqliteVocabList < VocabListBackend
+class SqliteVocabList < VocabList
   def initialize(db_filename)
     @db = SQLite3::Database.new(db_filename)
   end

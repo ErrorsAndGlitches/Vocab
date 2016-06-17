@@ -1,9 +1,9 @@
 require 'mysql2'
 
-require_relative 'vocab_list_backend'
+require_relative 'vocab_list'
 require_relative 'vocab_word'
 
-class MysqlVocabList < VocabListBackend
+class MysqlVocabList < VocabList
   def initialize(mysql_cfg_filename, should_update_existing)
     @mysql                  = Mysql2::Client.new(:default_file => mysql_cfg_filename, :default_group => 'client')
     @should_update_existing = should_update_existing
@@ -36,6 +36,16 @@ class MysqlVocabList < VocabListBackend
       update_vocab_words(vocab_words)
     else
       insert_vocab_words(vocab_words)
+    end
+  end
+
+  def remove(word)
+    @mysql.query("DELETE FROM words WHERE word='#{word}'")
+    if @mysql.query("SELECT * FROM words WHERE word='#{word}'").size == 0
+      puts "Successfully deleted: #{word}"
+    else
+      puts "Failed to delete: #{word}"
+      exit 1
     end
   end
 

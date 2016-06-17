@@ -13,8 +13,10 @@ Travis CI: [![Build Status](https://travis-ci.org/MusicalNeutrino/Vocab.svg?bran
 |   -c   | mysql.config | MySQL configuration for the vocabulary database.                                             |
 |   -a   | api key      | Merriam Webster API key for accessing Dictionary API endpoint.                               |
 |   -j   | api_key.json | File containing the Merriam Webster API key for accessing Dictionary API endpoint.           |
+|   -l   | -            | List the vocab words stored in the MySQL Db. The word/definition/example are tab separated.  |
 |   -i   | input.txt    | Input text file or Kindle EReader SQLite3 DB containing vocab words to upload.               |
-|   -l   | input delim  | The field delimiter for the input text file. Default delimiter: "#"                          |
+|   -p   | input delim  | The field delimiter for the input text file. Default delimiter: "#"                          |
 |   -o   | output.txt   | Output file for Anki ingestion (colon separated).                                            |
 |   -u   | -            | Allow updating the MySQL database, otherwise the vocabulary word is ignored.                 |
+|   -r   | word         | Remove a word from the MySQL Db.                                                             |
 |   -d   | -            | Clear the MySQL database.                                                                    |

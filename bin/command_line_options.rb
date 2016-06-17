@@ -8,6 +8,21 @@ class CommandLineOptions
     @args = args
   end
 
+  def sql_config_file
+    parse_options
+    @options[:sql_config_filename]
+  end
+
+  def api_key
+    parse_options
+    @options[:api_key] || json_api_key
+  end
+
+  def list_db_vocab
+    parse_options
+    @options[:list_db_vocab]
+  end
+
   def input_file
     parse_options
     @options[:input_filename]
@@ -28,19 +43,14 @@ class CommandLineOptions
     @options[:output_file_delimiter] || DEFAULT_FILE_DELIMITER
   end
 
-  def sql_config_file
-    parse_options
-    @options[:sql_config_filename]
-  end
-
-  def api_key
-    parse_options
-    @options[:api_key] || json_api_key
-  end
-
   def update_existing?
     parse_options
     @options[:update_existing]
+  end
+
+  def removal_word
+    parse_options
+    @options[:removal_word]
   end
 
   def clear_mysql_db?
@@ -84,11 +94,15 @@ class CommandLineOptions
         @options[:api_key_filename] = api_key_filename
       }
 
+      opts.on('-l', '--list-vocab', 'List the vocabulary words stored in the MySQL Db. The word, definition, and example are tab separated.') {
+        @options[:list_db_vocab] = true
+      }
+
       opts.on('-i', '--input-file=FILENAME', 'File containing vocab words to upload. Can either be a regular (.txt) or Kindle sqlite3 (.db) file.') { |input_filename|
         @options[:input_filename] = input_filename
       }
 
-      opts.on('-l', "--input-delim=DELIMITER', 'The field delimiter for the input text file. Default: #{DEFAULT_FILE_DELIMITER}") { |delimiter|
+      opts.on('-p', "--input-delim=DELIMITER', 'The field delimiter for the input text file. Default: #{DEFAULT_FILE_DELIMITER}") { |delimiter|
         @options[:input_file_delimiter] = delimiter
       }
 
@@ -102,6 +116,10 @@ class CommandLineOptions
 
       opts.on('-u', '--update-existing', 'Update the existing entries in the MySQL DB when the vocab word already exists') {
         @options[:update_existing] = true
+      }
+
+      opts.on('-r', '--removal-word=WORD', 'Delete the word from the MySQL database') { |word|
+        @options[:removal_word] = word
       }
 
       opts.on('-d', '--clear-mysql', 'Clear the MySQL database') {
