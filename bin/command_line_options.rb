@@ -8,9 +8,14 @@ class CommandLineOptions
     @args = args
   end
 
-  def sql_config_file
+  def sqlite_config_file
     parse_options
-    @options[:sql_config_filename]
+    @options[:sqlite_config_filename]
+  end
+
+  def sqlite_create_or_read_db
+    parse_options
+    @options[:sqlite_create_or_read_db]
   end
 
   def api_key
@@ -82,8 +87,12 @@ class CommandLineOptions
         exit 0
       }
 
-      opts.on('-c', '--sql-config=SQL_CONFIG', 'Path to the MYSQL configuration file') { |sql_config_filename|
-        @options[:sql_config_filename] = sql_config_filename
+      opts.on('-s', '--sqlite-config-filename=SQLITE_CONFIG_FILENAME', 'Path to the SQLite3 configuration file') { |sqlite_config_filename|
+        @options[:sqlite_config_filename] = sqlite_config_filename
+      }
+
+      opts.on('-c', '--sqlite-create-or-read-db', 'Create the SQLite DB file if it does not exist, otherwise just read it') {
+        @options[:sqlite_create_or_read_db] = true
       }
 
       opts.on('-a', '--api-key=API_KEY', 'Merriam Webster API key') { |api_key|
@@ -94,7 +103,7 @@ class CommandLineOptions
         @options[:api_key_filename] = api_key_filename
       }
 
-      opts.on('-l', '--list-vocab', 'List the vocabulary words stored in the MySQL Db. The word, definition, and example are tab separated.') {
+      opts.on('-l', '--list-vocab', 'List the vocabulary words stored in the SQLite Db. The word, definition, and example are tab separated.') {
         @options[:list_db_vocab] = true
       }
 
@@ -102,7 +111,7 @@ class CommandLineOptions
         @options[:input_filename] = input_filename
       }
 
-      opts.on('-p', "--input-delim=DELIMITER', 'The field delimiter for the input text file. Default: #{DEFAULT_FILE_DELIMITER}") { |delimiter|
+      opts.on('-p', '--input-delim=DELIMITER', "The field delimiter for the input text file. Default: #{DEFAULT_FILE_DELIMITER}") { |delimiter|
         @options[:input_file_delimiter] = delimiter
       }
 
@@ -114,15 +123,15 @@ class CommandLineOptions
         @options[:output_filename] = output_filename
       }
 
-      opts.on('-u', '--update-existing', 'Update the existing entries in the MySQL DB when the vocab word already exists') {
+      opts.on('-u', '--update-existing', 'Update the existing entries in the SQLite DB when the vocab word already exists') {
         @options[:update_existing] = true
       }
 
-      opts.on('-r', '--removal-word=WORD', 'Delete the word from the MySQL database') { |word|
+      opts.on('-r', '--removal-word=WORD', 'Delete the word from the SQLite database') { |word|
         @options[:removal_word] = word
       }
 
-      opts.on('-d', '--clear-mysql', 'Clear the MySQL database') {
+      opts.on('-d', '--clear-mysql', 'Clear the SQLite database') {
         @options[:clear_mysql_db] = true
       }
     }.parse(@args)

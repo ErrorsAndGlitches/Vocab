@@ -20,3 +20,10 @@ Travis CI: [![Build Status](https://travis-ci.org/MusicalNeutrino/Vocab.svg?bran
 |   -u   | -            | Allow updating the MySQL database, otherwise the vocabulary word is ignored.                 |
 |   -r   | word         | Remove a word from the MySQL Db.                                                             |
 |   -d   | -            | Clear the MySQL database.                                                                    |
+
+# Tests
+
+Run the tests using
+```
+  rspec
+```

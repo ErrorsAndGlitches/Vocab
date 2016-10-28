@@ -3,32 +3,50 @@
 require 'mysql2'
 require 'optparse'
 require 'open-uri'
+require 'yaml'
+require 'aws-sdk'
 
 require_relative 'command_line_options'
 require_relative '../lib/anki_note_cards'
+require_relative '../lib/s3_file'
 require_relative '../lib/dictionaries/merriam_webster_dictionary'
 require_relative '../lib/dictionaries/multi_dictionary'
-require_relative '../lib/dictionaries/my_sql_dictionary'
+require_relative '../lib/dictionaries/sqlite_dictionary'
 require_relative '../lib/vocab_lists/file_vocab_list'
-require_relative '../lib/vocab_lists/mysql_vocab_list'
+require_relative '../lib/vocab_lists/kindle_sqlite_vocab_list'
 require_relative '../lib/vocab_lists/sqlite_vocab_list'
 
 cmd_line_opts = CommandLineOptions.new(ARGV)
+fail('SQLite configuration required') if cmd_line_opts.sqlite_config_file.nil?
 
-fail('SQL configuration required') if cmd_line_opts.sql_config_file.nil?
-mysql_vocab_list = MysqlVocabList.new(cmd_line_opts.sql_config_file, cmd_line_opts.update_existing?)
+sqlite_config = YAML.load(File.read(cmd_line_opts.sqlite_config_file))
+creds = YAML.load(File.read(sqlite_config['credentials_filename']))
+s3_client = Aws::S3::Client.new(
+  access_key_id: creds['access_key_id'],
+  secret_access_key: creds['secret_access_key']
+)
+
+sqlite_s3_file = S3File.new(s3_client, sqlite_config['bucket_name'], sqlite_config['key_name'])
+
+if cmd_line_opts.sqlite_create_or_read_db
+  sqlite_vocab_list = SqliteVocabList.new(sqlite_s3_file.local_filepath, cmd_line_opts.update_existing?)
+  sqlite_vocab_list.create_table
+else
+  sqlite_s3_file.download
+  sqlite_vocab_list = SqliteVocabList.new(sqlite_s3_file.local_filepath, cmd_line_opts.update_existing?)
+end
 
 if cmd_line_opts.list_db_vocab
-  mysql_vocab_list.vocab_words.each { |vocab_word|
+  sqlite_vocab_list.vocab_words.each { |vocab_word|
     puts "#{vocab_word.word}\t#{vocab_word.definition}\t#{vocab_word.example}"
   }
 end
 
 if cmd_line_opts.clear_mysql_db?
-  mysql_vocab_list.clear
+  sqlite_vocab_list.clear
 elsif !cmd_line_opts.removal_word.nil?
   removal_word = cmd_line_opts.removal_word
-  mysql_vocab_list.remove(removal_word)
+  sqlite_vocab_list.remove(removal_word)
 end
 
 if cmd_line_opts.input_file
@@ -39,13 +57,13 @@ if cmd_line_opts.input_file
   if input_filename.end_with?('txt')
     input_vocab_list = FileVocabList.new(input_filename, cmd_line_opts.input_file_delimiter)
   elsif input_filename.end_with?('db')
-    input_vocab_list = SqliteVocabList.new(input_filename)
+    input_vocab_list = KindleSqliteVocabList.new(input_filename)
   else
     fail("Unrecognized filetype: #{input_filename}")
   end
 
   dictionary  = MultiDictionary.new([
-                                      MySqlDictionary.new(cmd_line_opts.sql_config_file),
+                                      SqliteDictionary.new(sqlite_s3_file.local_filepath),
                                       MerriamWebsterDictionary.new(cmd_line_opts.api_key)
                                     ])
   vocab_words = []
@@ -65,11 +83,14 @@ if cmd_line_opts.input_file
     end
   }
 
-  mysql_vocab_list.add_vocab_words(vocab_words)
+  sqlite_vocab_list.add_vocab_words(vocab_words)
 end
 
 if cmd_line_opts.output_file
   File.open(cmd_line_opts.output_file, 'w') { |output_file|
-    AnkiNoteCards.new(mysql_vocab_list.vocab_words, cmd_line_opts.output_file_delimiter).write(output_file)
+    AnkiNoteCards.new(sqlite_vocab_list.vocab_words, cmd_line_opts.output_file_delimiter).write(output_file)
   }
 end
+
+sqlite_vocab_list.close
+sqlite_s3_file.upload
