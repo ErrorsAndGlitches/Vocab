@@ -4,7 +4,7 @@ rvm:
 git:
   depth: 1
 script:
-  - rspec
+  - ruby -S bundle exec rspec
 branches:
   only:
     - master
